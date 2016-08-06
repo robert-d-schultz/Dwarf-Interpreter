@@ -1,0 +1,117 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="author" content="Robert Schultz">
+        <meta name="keywords" content="Dwarf Fortress, Language, Machine Translator, Goblin, Dwarf, Elf, Human">
+        <title>Dwarf Interpretor</title>
+        <link rel="shortcut icon" href="icon.ico">      
+        <link rel="stylesheet" type="text/css" href="distyle.css" title="Dwarves" />
+        
+        <script type="text/javascript">
+            function retrieve(str,lang,fill,skip) {
+                if (str.length == 0) { 
+                    document.getElementById("translated").innerHTML = "";
+                    return;
+                } else {
+                    var xmlhttp = new XMLHttpRequest();
+                    xmlhttp.onreadystatechange = function() {
+                        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                            document.getElementById("translated").setAttribute("name",lang);
+                            document.getElementById("translated").setAttribute("value",fill);
+                            document.getElementById("translated").innerHTML = xmlhttp.responseText;
+                        }
+                    };
+                    xmlhttp.open("GET", "database.php?str=" + str.split("\n").join("%0A") + "&lang=" + lang + "&fill=" + fill + "&skip=" + skip, true);
+                    xmlhttp.send();
+                }
+            }
+        </script>
+        
+        <script type="text/javascript">
+            function changeToText(obj){
+                tb = document.createElement('SPAN');
+                tb.id = obj.name;
+                
+                fill = document.getElementById("translated").getAttribute("value");
+                if ((obj.options.length - 1) == obj.selectedIndex) {
+                    if(fill == "yes") {
+                        str = obj.options[obj.selectedIndex].value;
+                        lang = document.getElementById("translated").getAttribute("name");
+                        var xmlhttp = new XMLHttpRequest();
+                        xmlhttp.onreadystatechange = function() {
+                            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                                tb.innerHTML = "<font color='red'>" + xmlhttp.responseText + "</font>";
+                            }
+                        };
+                        xmlhttp.open("GET", "database.php?str=" + str.split("\n").join("%0A") + "&lang=" + lang + "&fill=" + fill + "&skip=" + "yes", true);
+                        xmlhttp.send();
+                    }
+                    else {
+                        tb.innerHTML = "<font color='red'>" + obj.options[obj.selectedIndex].value + "</font>";
+                    }
+                }
+                else {
+                    tb.innerHTML = obj.options[obj.selectedIndex].value;
+                }
+                obj.parentNode.insertBefore(tb,obj);
+                obj.parentNode.removeChild(obj);
+            }
+        </script>
+    </head>
+    <body>
+    
+    <div class="header" align="center">
+        <!--Title-->
+        <img alt="Dwarf Interpreter" border="0" src="logo.png" width="900" height="120" align="center"/>
+    </div>
+    
+    <div id="wrapper">
+    <div id="translatefrom">
+        <form accept-charset="utf-8">
+            <section id="translateInto" style="float:left">
+                <!--Select language-->
+                <b>Translate Into:</b>
+                <select name="language">
+                    <option value="dwarf">Dwarven</option>
+                    <option value="elf">Elvish</option>
+                    <option value="human">Human</option>
+                    <option value="goblin">Goblin</option>
+                </select>
+            </section>
+             
+            <section id="translateUnknown" style="float:right">
+                <!--Fill-in-the-blanks checkbox-->
+                <b>Fill-in Unknown Words:</b>
+                <select name="fill">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </section>
+            
+            <br>
+        
+            <!--Input text-->
+            <textarea name="toTranslate" rows="10" cols="80">The quick brown dwarf jumps over the boring elf.</textarea>
+            
+            <br><br>
+            
+             <!--Translate button-->
+            <input type="button" onclick="retrieve(toTranslate.value,language.value,fill.value,'no')" value="Translate">
+            
+        </form>
+    </div>
+    
+    <div id="wrapper2">
+    <b>Translated Text:</b>
+    <div id="translateto">
+        <!--Output-->
+        <p><span id="translated" name="empty" value="empty"></span></p>
+    </div>
+    </div>
+    
+    <div class="footer">
+        <p>Literally nothing copyrightable on this webpage. Translations taken from <a href="http://www.bay12games.com/dwarves/"><i>Dwarf Fortress</i></a>.</p>
+    </div>
+    </div>
+    </body>
+</html>

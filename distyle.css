@@ -1,0 +1,37 @@
+#translatefrom{
+    background-color:#1C0E00;
+    padding:10px; 
+}
+#wrapper2 {
+    background-color:#1C0E00;
+    padding:10px;
+    text-align: justify;
+    min-height: 50%;
+}
+
+#translateto {
+    margin-bottom: 20px;
+    padding: 5px 10px 10px 10px;
+    background: #111 url(bgstone.jpg);
+    border: 1px solid #465;
+    min-height: 27px;
+    text-align: justify;
+}
+
+.footer {
+    background-color:black;
+    color:white;
+    clear:both;
+    text-align:center;
+    padding:5px; 
+}
+html
+{
+    color: #FFFFFF;
+    background: black url(back.png);
+    background-attachment:fixed;
+}
+#wrapper {
+    width: 600px;
+    margin: 0 auto;
+}
