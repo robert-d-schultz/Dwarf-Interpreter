@@ -72,21 +72,46 @@ function checkDatabase($eng, $lang2, $fill2, $conn2){
 // If there is one, then it takes the rest of the word and passes it back to checkDatabase
 // If nothing is found, then it passes the word to hashUnknown
 function checkPrefix($eng2, $lang3, $fill3, $conn3){
-    $index = [];
-    for ($i = 0; $i <= strlen($eng2); $i++) {
+    $index = 1;
+    $pref = [];
+    for ($i = -1; $i > -strlen($eng2); $i--) {
         $sql = "SELECT " . $lang3 . ", disambig, pos FROM DefinitionsTable WHERE english='" . substr($eng2,0,$i) . "' AND pos='PREFIX'";
         $result2 = $conn3->query($sql);
         
         if ($result2->num_rows == 1) {
             $row = $result2->fetch_assoc();
-            $possible[] = $row[$lang3];
-            $index[] = $i;
+            if(ctype_upper($eng2[0])) {
+                if(ctype_upper($eng2)&&(strlen($eng2)>1)) {
+                    $case = mb_strtoupper($row[$lang3]);
+                }
+                else {
+                    $case = mb_convert_case($row[$lang3],MB_CASE_TITLE);
+                }
+            }
+            else {
+                $case = $row[$lang3];
+            }
+            $pref = $case;
+            $index = $i;
+            break;
         }
         elseif ($result2->num_rows > 1) {
             $build = "<select name='disambig' onchange='changeToText(this);'>";
             $build .= "<option value='opt0'>" . $eng2 . "</option>";
             while($row = $result2->fetch_assoc()) {
-                $build .= "<option value='" . $row[$lang3] . "'>" . $row[$lang3] . " (" . $row["pos"];
+                if(ctype_upper($eng2[0])) {
+                    if(ctype_upper($eng2)&&(strlen($eng2)>1)) {
+                        $case = mb_strtoupper($row[$lang3]);
+                    }
+                    else {
+                        $case = mb_convert_case($row[$lang3],MB_CASE_TITLE);
+                    }
+                }
+                else {
+                    $case = $row[$lang3];
+                }
+                
+                $build .= "<option value='" . $case . "'>" . $case . " (" . $row["pos"];
                 if($row["noun"]!="") {
                     $build .= " " . $row["noun"];
                 }
@@ -101,25 +126,14 @@ function checkPrefix($eng2, $lang3, $fill3, $conn3){
             $build = substr($build, 0, -1);
             $build .= "<option value='" . $eng2 . "'>none of these</option>";
             $build .= "</select>";
-            $possible[] = $build;
-            $index[] = $i;
+            $pref = $build;
+            $index = $i;
+            break;
         }
     }
     if(count($index)>0) {
-        $uncase = $possible[array_search(max($index),$index)];
-        if(ctype_upper($eng2[0])) {
-            if(ctype_upper($eng2)&&(strlen($eng2)>1)) {
-                $case = mb_strtoupper($uncase);
-            }
-            else {
-                $case = mb_convert_case($uncase,MB_CASE_TITLE);
-            }
-        }
-        else {
-            $case = $uncase;
-        }
-        $output3 = $case;
-        $output3 .= checkDatabase(substr($eng2,max($index)),$lang3,$conn3);
+        $output3 = $pref;
+        $output3 .= checkDatabase(substr($eng2,$index),$lang3,$conn3);
     }
     else {
         if($fill3=="yes") {
