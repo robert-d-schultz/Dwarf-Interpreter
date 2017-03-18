@@ -20,33 +20,13 @@ function checkDatabase($eng, $lang2, $fill2, $conn2){
 
     if ($result->num_rows == 1) {
         $row = $result->fetch_assoc();
-        if(ctype_upper($eng[0])) {
-            if(ctype_upper($eng)&&(strlen($eng)>1)) {
-                $output2 = mb_strtoupper($row[$lang2]);
-            }
-            else {
-                $output2 = mb_convert_case($row[$lang2],MB_CASE_TITLE);
-            }
-        }
-        else {
-            $output2 = $row[$lang2];
-        }
+        $output2 = sortOutCaps($eng, $row[$lang2]);  
     }
     elseif ($result->num_rows > 1) {
         $output2 = "<select name='disambig' onchange='changeToText(this);'>";
         $output2 .= "<option value='opt0'>" . $eng . "</option>";
         while($row = $result->fetch_assoc()) {
-            if(ctype_upper($eng[0])) {
-                if(ctype_upper($eng)&&(strlen($eng)>1)) {
-                    $case = mb_strtoupper($row[$lang2]);
-                }
-                else {
-                    $case = mb_convert_case($row[$lang2],MB_CASE_TITLE);
-                }
-            }
-            else {
-                $case = $row[$lang2];
-            }            
+			$case = sortOutCaps($eng, $row[$lang2]);            
             $output2 .= "<option value='" . $case . "'>" . $case . " (" . $row["pos"];
             if($row["noun"]!="") {
                 $output2 .= " " . $row["noun"];
@@ -80,18 +60,7 @@ function checkPrefix($eng2, $lang3, $fill3, $conn3){
         
         if ($result2->num_rows == 1) {
             $row = $result2->fetch_assoc();
-            if(ctype_upper($eng2[0])) {
-                if(ctype_upper($eng2)&&(strlen($eng2)>1)) {
-                    $case = mb_strtoupper($row[$lang3]);
-                }
-                else {
-                    $case = mb_convert_case($row[$lang3],MB_CASE_TITLE);
-                }
-            }
-            else {
-                $case = $row[$lang3];
-            }
-            $pref = $case;
+            $pref = sortOutCaps($eng2, $row[$lang3]);
             $index = $i;
             break;
         }
@@ -99,18 +68,7 @@ function checkPrefix($eng2, $lang3, $fill3, $conn3){
             $build = "<select name='disambig' onchange='changeToText(this);'>";
             $build .= "<option value='opt0'>" . $eng2 . "</option>";
             while($row = $result2->fetch_assoc()) {
-                if(ctype_upper($eng2[0])) {
-                    if(ctype_upper($eng2)&&(strlen($eng2)>1)) {
-                        $case = mb_strtoupper($row[$lang3]);
-                    }
-                    else {
-                        $case = mb_convert_case($row[$lang3],MB_CASE_TITLE);
-                    }
-                }
-                else {
-                    $case = $row[$lang3];
-                }
-                
+				$case = sortOutCaps($eng2, $row[$lang3]);
                 $build .= "<option value='" . $case . "'>" . $case . " (" . $row["pos"];
                 if($row["noun"]!="") {
                     $build .= " " . $row["noun"];
@@ -131,9 +89,9 @@ function checkPrefix($eng2, $lang3, $fill3, $conn3){
             break;
         }
     }
-    if(count($index)>0) {
+    if($index != 1) {
         $output3 = $pref;
-        $output3 .= checkDatabase(substr($eng2,$index),$lang3,$conn3);
+        $output3 .= checkDatabase(substr($eng2,$index),$lang3, $fill3, $conn3);
     }
     else {
         if($fill3=="yes") {
@@ -146,8 +104,24 @@ function checkPrefix($eng2, $lang3, $fill3, $conn3){
     return $output3;
 }
 
+// Makes sure the capitalization doesn't change
+function sortOutCaps($eng, $word) {
+	if(ctype_upper($eng[0])) {
+		if(ctype_upper($eng)&&(strlen($eng)>1)) {
+			$case = mb_strtoupper($word);
+		}
+		else {
+			$case = mb_convert_case($word,MB_CASE_TITLE);
+		}
+		}
+	else {
+		$case = $word;
+	}
+	return $case;
+}
+
+
 // Hashes unknown word
-// Dwarf/elf only so far
 function hashUnknown($eng3, $lang4) {
     // Pad short words
     $word = mb_strtolower($eng3);
